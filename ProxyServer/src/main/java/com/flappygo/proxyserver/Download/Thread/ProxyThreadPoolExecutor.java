@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
@@ -17,7 +18,7 @@ import java.util.concurrent.ThreadFactory;
 
 
 public class ProxyThreadPoolExecutor extends ScheduledThreadPoolExecutor {
-
+    private Executor temp;
     //当前正在执行或者即将执行的线程
     private ConcurrentHashMap<String, Thread> lthreads;
 
@@ -98,6 +99,7 @@ public class ProxyThreadPoolExecutor extends ScheduledThreadPoolExecutor {
         synchronized (lthreads) {
             lthreads.put(Long.toString(thread.getId()), thread);
         }
+
     }
 
     //从hashmap中移除线程

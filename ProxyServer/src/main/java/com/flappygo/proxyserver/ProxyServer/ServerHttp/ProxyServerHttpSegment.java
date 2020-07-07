@@ -50,7 +50,7 @@ public class ProxyServerHttpSegment {
         if (downLoadActor.isDownloaded()) {
             //取得offset
             long offset = startOffset - downLoadActor.getRangeStart();
-          //  System.out.println("走的缓存");
+            System.out.println("走的缓存");
             //那么这里就走缓存的流程
             new HttpRequestCached(proxyServer,
                     response,
@@ -61,7 +61,7 @@ public class ProxyServerHttpSegment {
             //长度
             long length = (downLoadActor.getRangeStart() + downLoadActor.getRangeLength() - startOffset);
             //那么这里就走网络的流程
-          //  System.out.println("走的网络");
+            System.out.println("走的网络");
             new HttpRequestNetwork(proxyServer,
                     headers,
                     response,
@@ -71,6 +71,8 @@ public class ProxyServerHttpSegment {
                     length
             ).doResponseNet();
         }
+
+
     }
 
 }

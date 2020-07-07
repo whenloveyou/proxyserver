@@ -97,7 +97,8 @@ public class MutiThreadDownLoad {
                     endIndex = rangeStart + length-1;
                 }
               //  System.out.println("线程" + threadId + "下载:" + startIndex + "字节~" + endIndex + "字节");
-                new DownLoadThread(serverUrlPath,localPath,threadCount,threadId,blockSize,startIndex,endIndex,latch).start();
+                DownLoadThread temp = new DownLoadThread(serverUrlPath,localPath,threadCount,threadId,blockSize,startIndex,endIndex,latch);
+                temp.start();
 
                 startIndex=endIndex;
             }

@@ -545,17 +545,13 @@ public class ProxyServerHttp implements ProxyServer {
             //设置下载器的tag,方便我们确认下载排序的序号
             actor.actorTag = s;
             //开启线程池
-            ProxyDownloadThread thread = new ProxyDownloadThread(actor);
+          //  ProxyDownloadThread thread = new ProxyDownloadThread(actor);
             //加入到线程池中执行
-            threadPool.execute(thread);
+          //  threadPool.execute(thread);
             //创建
             ProxyServerHttpSegment requestCallback = new ProxyServerHttpSegment(this, headers, actor, response);
             //添加子请求
             childList.add(requestCallback);
-
-
-
-
         }
 
         //调用代理

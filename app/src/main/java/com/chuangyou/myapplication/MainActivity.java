@@ -33,13 +33,16 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
    // private String url = "https://ca.nspace.live/moshou.mp4";
    // private String url = "https://ca.nspace.live/animi/asian/quanzhifashi3/08.mp4";
     // private String url = "https://ca.nspace.live/sdx19.mp4";
-   private String url = "https://hk1.nspace.live/moshou.mp4";
+   //private String url = "https://hk1.nspace.live/moshou.mp4";
    //   private String url = "https://hk1.nspace.live/animi/asian/quanzhifashi3/03.mp4";
   // private String url = "https://ca.nspace.live/moshou.mp4";
   // private String url = "https://hk1.nspace.live/animi/asian/shizhongjiguanzhixing/shizhong12.mp4";
  // private String url = "https://hk1.nspace.live//series/cn/wuxinfashi/wuxinfashi01.mp4";
  //    private String url = "https://flv2.bn.netease.com/videolib3/1711/04/uwieG3913/HD/uwieG3913-mobile.mp4";
     //private String url = "http://mother.nspace.site/series/cn/wuxinfashi/wuxinfashi01.mp4";
+
+    private String url = "https://hk1.nspace.live/series/cn/wuxinfashi/wuxinfashi01.mp4";
+
     //private String url = "http://data.vod.itc.cn/?new=/91/42/pZqBu6MSS6qxJ83Lg979vf.mp4&vid=103937904&plat=17&mkey=TFnKEKpZxMTGPzyTf0wiSldd87RL7Z57&ch=null&user=api&uid=1608272337357415&SOHUSVP=VDu23U0Yy1SYOspSg9G7kMO1uHxStSw_3rI-9Y_I7uc&pt=1&prod=56&pg=1&eye=0&cv=1.0.0&qd=68000&src=11050001&ca=4&cateCode=300&_c=1&appid=tv";
 
     //private  String url = "https://blz-videos.nosdn.127.net/1/OverWatch/AnimatedShots/Overwatch_AnimatedShot_Soldier76_Hero.mp4";
@@ -131,10 +134,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         LibVLC libVLC = new LibVLC(getBaseContext(), options);
         //胃一直
         unique = System.currentTimeMillis()+"";
-      //  ThreadProxy temp=new ThreadProxy();
-    //    temp.start();
+       // ThreadProxy temp=new ThreadProxy();
+      //  temp.addAction();
         //对这个地址进行代理
-        String trueUrl = FlappyProxyServer.getInstance(getApplicationContext()).proxyStart(url, unique);
+       String trueUrl = FlappyProxyServer.getInstance(getApplicationContext()).proxyStart(url, unique);
 
         //创建media
         final Media media = new Media(libVLC, Uri.parse(trueUrl));
