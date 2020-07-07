@@ -33,10 +33,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
    // private String url = "https://ca.nspace.live/moshou.mp4";
    // private String url = "https://ca.nspace.live/animi/asian/quanzhifashi3/08.mp4";
     // private String url = "https://ca.nspace.live/sdx19.mp4";
-  //  private String url = "https://hk1.nspace.live/moshou.mp4";
-      private String url = "https://hk1.nspace.live/animi/asian/quanzhifashi3/08.mp4";
+   private String url = "https://hk1.nspace.live/moshou.mp4";
+   //   private String url = "https://hk1.nspace.live/animi/asian/quanzhifashi3/03.mp4";
   // private String url = "https://ca.nspace.live/moshou.mp4";
-   //private String url = "https://hk1.nspace.live/animi/asian/shizhongjiguanzhixing/shizhong12.mp4";
+  // private String url = "https://hk1.nspace.live/animi/asian/shizhongjiguanzhixing/shizhong12.mp4";
  // private String url = "https://hk1.nspace.live//series/cn/wuxinfashi/wuxinfashi01.mp4";
  //    private String url = "https://flv2.bn.netease.com/videolib3/1711/04/uwieG3913/HD/uwieG3913-mobile.mp4";
     //private String url = "http://mother.nspace.site/series/cn/wuxinfashi/wuxinfashi01.mp4";
@@ -131,8 +131,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         LibVLC libVLC = new LibVLC(getBaseContext(), options);
         //胃一直
         unique = System.currentTimeMillis()+"";
-        ThreadProxy temp=new ThreadProxy();
-        temp.start();
+      //  ThreadProxy temp=new ThreadProxy();
+    //    temp.start();
         //对这个地址进行代理
         String trueUrl = FlappyProxyServer.getInstance(getApplicationContext()).proxyStart(url, unique);
 
