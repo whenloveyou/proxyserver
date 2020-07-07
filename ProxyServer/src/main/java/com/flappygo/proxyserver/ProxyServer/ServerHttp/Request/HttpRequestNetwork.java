@@ -3,6 +3,7 @@ package com.flappygo.proxyserver.ProxyServer.ServerHttp.Request;
 import com.flappygo.proxyserver.Config.ServerConfig;
 import com.flappygo.proxyserver.Interface.ProxyServer;
 import com.flappygo.proxyserver.ProxyServer.ServerHttp.Interface.ProxyServerHttpSegmentListener;
+import com.flappygo.proxyserver.Tools.ToolLog;
 import com.koushikdutta.async.ByteBufferList;
 import com.koushikdutta.async.callback.WritableCallback;
 import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
@@ -11,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.CountDownLatch;
@@ -59,15 +62,15 @@ class NetworkThread implements Runnable {
     public NetworkThread(String urlFile, HashMap<String, String> headers,
                          long contentStartIndex, long contentLength)
             throws InterruptedException {
+        // 设置分片大小
+        long segmentSize = FILE_SEGMENHT_SIZE;
+
         // 计算需要多少线程进行下载
-        long threadCount = contentLength / FILE_SEGMENHT_SIZE;
-        long remain = contentLength % FILE_SEGMENHT_SIZE;
+        long threadCount = contentLength / segmentSize;
+        long remain = contentLength % segmentSize;
         if ( remain > 0 ) {
             threadCount++;
         }
-
-        // 设置分片大小
-        long segmentSize = FILE_SEGMENHT_SIZE;
 
         // 初始化线程计数
         final CountDownLatch cbRef = new CountDownLatch((int)threadCount);
@@ -83,7 +86,7 @@ class NetworkThread implements Runnable {
             if (contentLength >= (i+1)*segmentSize ){
                 length = segmentSize;
             }else{
-                length = remain-1;
+                length = remain;
             }
 
             // 开启下载线程
@@ -245,22 +248,50 @@ public class HttpRequestNetwork {
             startPos = 0;
             int len = 0;
             while ( startPos < contentStr.length ){
+                // 计算发送数据长度
                 if ( contentStr.length - startPos < 1024 ){
-                    len = contentStr.length - startPos;
+                    len = contentStr.length - startPos-1;
                 }else{
                     len = buffer.length;
                 }
-                System.arraycopy(contentStr, startPos, buffer, 0, len);
-                startPos += len;
-                //写入数据
-                ByteBufferList bufferList = new ByteBufferList(buffer);
-                //写入进去
-                response.write(bufferList);
+
+                //整个服务已经停止，不再相应
+                if (proxyServer.isStoped()) {
+                    //提醒监听结束
+                    if (listener != null) {
+                        listener.segmentProxyStoped();
+                    }
+                    break;
+                }
+
+                //如果不是等待状态
+                if (awaitFlag == false) {
+                    // 获取数据
+                    System.arraycopy(contentStr, startPos, buffer, 0, len);
+                    startPos += len;
+                    //写入数据
+                    ByteBufferList bufferList = new ByteBufferList(buffer);
+                    //写入进去
+                    response.write(bufferList);
+                    //写入了多少
+                    rangeNower += len;
+                    //等待
+                    if (bufferList.remaining() > 0) {
+                        //减去没有写入的
+                        rangeNower -= bufferList.remaining();
+                        //等待下一波
+                        awaitFlag = true;
+                        //跳出循环
+                        break;
+                    }
+                }
             }
 
             // 结束分片处理
-            if (listener != null) {
-                listener.segmentProxyEnd();
+            if (rangeNower == rangeStart + rangeLength) {
+                if (listener != null) {
+                    listener.segmentProxyEnd();
+                }
             }
         } catch ( InterruptedException e ) {
             //断线重连
@@ -309,16 +340,12 @@ public class HttpRequestNetwork {
             //重试
             resetRetryTime();
 
-            byte[] content = new byte[(int)rangeLength+100];
-            int startPos = 0;
-
             //缓存大小
             byte[] buffer = new byte[1024];
             //长度
             int len = 0;
             //循环读取
             while ((len = inputStream.read(buffer)) != -1) {
-
                 //整个服务已经停止，不再相应
                 if (proxyServer.isStoped()) {
                     //提醒监听结束
@@ -345,10 +372,6 @@ public class HttpRequestNetwork {
                     byte[] proxByte = new byte[len];
                     //内存拷贝
                     System.arraycopy(buffer, 0, proxByte, 0, len);
-
-                    System.arraycopy(buffer, 0, content, startPos, len);
-                    startPos += len;
-
                     //写入数据
                     ByteBufferList bufferList = new ByteBufferList(proxByte);
                     //写入进去
@@ -366,8 +389,6 @@ public class HttpRequestNetwork {
                     }
                 }
             }
-
-            //System.out.println(new String(content));
 
             //关闭连接
             inputStream.close();
