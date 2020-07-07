@@ -132,7 +132,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         //胃一直
         unique = System.currentTimeMillis()+"";
         ThreadProxy temp=new ThreadProxy();
-        temp.proxy();
+        temp.start();
         //对这个地址进行代理
         String trueUrl = FlappyProxyServer.getInstance(getApplicationContext()).proxyStart(url, unique);
 

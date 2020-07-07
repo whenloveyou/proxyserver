@@ -432,7 +432,7 @@ public class DownLoadActor extends Thread {
             try {
                // thread.latch.await();
                 while (true){
-                    Thread.sleep(10);
+                   // Thread.sleep(10);
                     if (thread.latch.getCount()==0){
                         break;
                     }
