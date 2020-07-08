@@ -69,7 +69,7 @@ public class ProxyServerHttpSegment {
                     downLoadActor.getDownLoadUrl(),
                     startOffset,
                     length
-            ).doResponseNet();
+            ).doResponseNetThread();
         }
 
 

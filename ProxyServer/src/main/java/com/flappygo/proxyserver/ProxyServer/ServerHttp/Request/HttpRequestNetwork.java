@@ -17,6 +17,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 // 多线程请求数据类
 class NetworkThread implements Runnable {
@@ -65,13 +67,14 @@ class NetworkThread implements Runnable {
         // 设置分片大小
         long segmentSize = FILE_SEGMENHT_SIZE;
 
+
         // 计算需要多少线程进行下载
         long threadCount = contentLength / segmentSize;
         long remain = contentLength % segmentSize;
         if ( remain > 0 ) {
             threadCount++;
         }
-
+        ScheduledThreadPoolExecutor threadPool=new ScheduledThreadPoolExecutor((int)threadCount);
         // 初始化线程计数
         final CountDownLatch cbRef = new CountDownLatch((int)threadCount);
 
@@ -91,7 +94,8 @@ class NetworkThread implements Runnable {
 
             // 开启下载线程
             NetworkThread work = new NetworkThread(urlFile, headers, startPos, length, i, contentList, cbRef);
-            new Thread(work).start();
+            threadPool.execute(work);
+
         }
 
         cbRef.await();

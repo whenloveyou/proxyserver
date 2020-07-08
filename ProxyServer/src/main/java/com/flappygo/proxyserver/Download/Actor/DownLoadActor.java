@@ -426,7 +426,7 @@ public class DownLoadActor extends Thread {
                 thread=new MutiThreadDownLoad(threadCount,fileUrlPath,fileAbsolutePath,rangeStart,rangeLength,fileActure,latch);
             }
 
-         //   thread.executeDownLoad();
+            thread.executeDownLoad();
             downLoadState = DOWNLOADING;
             long startTime = System.currentTimeMillis();
             try {
