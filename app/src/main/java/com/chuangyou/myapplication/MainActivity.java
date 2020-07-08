@@ -33,11 +33,12 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
    // private String url = "https://ca.nspace.live/moshou.mp4";
    // private String url = "https://ca.nspace.live/animi/asian/quanzhifashi3/08.mp4";
     // private String url = "https://ca.nspace.live/sdx19.mp4";
- //  private String url = "https://hk1.nspace.live/moshou.mp4";
+ // private String url = "https://hk1.nspace.live/moshou.mp4";
      // private String url = "https://hk1.nspace.live/animi/asian/quanzhifashi3/03.mp4";
   // private String url = "https://ca.nspace.live/moshou.mp4";
-   private String url = "https://hk1.nspace.live/animi/asian/shizhongjiguanzhixing/shizhong12.mp4";
- // private String url = "https://hk1.nspace.live//series/cn/wuxinfashi/wuxinfashi01.mp4";
+    // private String url = "https://hk1.nspace.live/animi/asian/shizhongjiguanzhixing/shizhong12.mp4";
+  //   private String url = "https://hk1.nspace.live//series/cn/wuxinfashi/wuxinfashi01.mp4";
+    private String url = "https://hk1.nspace.live//series/cn/wuxinfashi/m3u8/01.m3u8";
  //    private String url = "https://flv2.bn.netease.com/videolib3/1711/04/uwieG3913/HD/uwieG3913-mobile.mp4";
     //private String url = "http://mother.nspace.site/series/cn/wuxinfashi/wuxinfashi01.mp4";
 
@@ -48,7 +49,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
     //private  String url = "https://blz-videos.nosdn.127.net/1/OverWatch/AnimatedShots/Overwatch_AnimatedShot_Soldier76_Hero.mp4";
 
     //private String url = "https://media.w3.org/2010/05/sintel/trailer.mp4";
-    //private String url = "https://hk1.nspace.live/series/cn/qinyunian/m3u8/01.m3u8";
+  //  private String url = "https://hk1.nspace.live/series/cn/qinyunian/m3u8/01.m3u8";
    // private String url = "https://hk1.nspace.live/alitam3u8/01.m3u8";
 
     //private String url = "http://v5.zgzo.com/hzw.mp4";
@@ -135,7 +136,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         //胃一直
         unique = System.currentTimeMillis()+"";
        // ThreadProxy temp=new ThreadProxy();
-      //  temp.addAction();
+       // temp.addAction();
         //对这个地址进行代理
        String trueUrl = FlappyProxyServer.getInstance(getApplicationContext()).proxyStart(url, unique);
 

@@ -43,6 +43,8 @@ class NetworkThread implements Runnable {
     // 分片索引
     private long index;
 
+
+
     // 下载结果列表
     public HashMap<Long, byte[]> contentList;
 
@@ -74,7 +76,7 @@ class NetworkThread implements Runnable {
         if ( remain > 0 ) {
             threadCount++;
         }
-        ScheduledThreadPoolExecutor threadPool=new ScheduledThreadPoolExecutor((int)threadCount);
+
         // 初始化线程计数
         final CountDownLatch cbRef = new CountDownLatch((int)threadCount);
 
@@ -93,8 +95,9 @@ class NetworkThread implements Runnable {
             }
 
             // 开启下载线程
+
             NetworkThread work = new NetworkThread(urlFile, headers, startPos, length, i, contentList, cbRef);
-            threadPool.execute(work);
+            new Thread(work).start();
 
         }
 
@@ -225,6 +228,7 @@ public class HttpRequestNetwork {
         //此处对请求进行相应的代理处理
         try {
             this.isThread = true;
+
             NetworkThread networkThread = new NetworkThread(urlStr, headers, rangeStart, rangeLength);
 
             // 获取数据总长度

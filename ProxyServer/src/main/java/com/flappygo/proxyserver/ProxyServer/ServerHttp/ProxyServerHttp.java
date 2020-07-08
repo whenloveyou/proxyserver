@@ -59,6 +59,8 @@ public class ProxyServerHttp implements ProxyServer {
     //当前服务是否被停止
     private volatile boolean isStoped = false;
 
+    private int readStatus;
+
     //重试的时间
     private volatile long retryTime = 0;
 
@@ -328,12 +330,13 @@ public class ProxyServerHttp implements ProxyServer {
 
             //处理response
             handleResponseRange(rangeStart, contentLength, response);
+            //停止
+            conn.disconnect();
 
             //所有的paths进入代理流程
             initPaths(requestMaps, contentLength, rangeStart, rangeStopd, response);
 
-            //停止
-            conn.disconnect();
+
         }
         //如果是其他的错误
         catch (Exception ex) {
@@ -508,51 +511,54 @@ public class ProxyServerHttp implements ProxyServer {
         }
     }
 
+    private void processDownload(HashMap<String, String> headers,
+                                 long contentLength,
+                                 long start,
+                                 long end,
+                                 AsyncHttpServerResponse response){
 
+
+    }
     //处理
     private void initPaths(HashMap<String, String> headers,
                            long contentLength,
                            long start,
                            long end,
                            AsyncHttpServerResponse response) {
-
         //当前threadPool
         ProxyThreadPoolExecutor threadPool = new ProxyThreadPoolExecutor(ServerConfig.THREAD_POOL_SIZE);
 
         //获取所有的播放列表
         List<HttpSegmentModel> paths = ToolString.getHttpSegments(urlPath, contentLength, start, end);
-
         //列表
         final List<ProxyServerHttpSegment> childList = new ArrayList<>();
-
-
-
         //判断
 
-        for (int s = 0; s < paths.size(); s++) {
+            for (int s = 0; s < paths.size(); s++) {
 
-            //实际下载文件的地址
-            String trueUrlPath = paths.get(s).getUrl();
-            //真实的保存文件的地址
-            String trueDictionary = getUrlDicotry();
-            //创建下载器
-            DownLoadActor actor = new DownLoadActor(headers,
-                    trueUrlPath,
-                    trueDictionary,
-                    paths.get(s).getSegmentName(),
-                    paths.get(s).getStart(),
-                    paths.get(s).getLength());
-            //设置下载器的tag,方便我们确认下载排序的序号
-            actor.actorTag = s;
-            //开启线程池
-            ProxyDownloadThread thread = new ProxyDownloadThread(actor);
-            //加入到线程池中执行
-            threadPool.execute(thread);
-            //创建
-            ProxyServerHttpSegment requestCallback = new ProxyServerHttpSegment(this, headers, actor, response);
-            //添加子请求
-            childList.add(requestCallback);
-        }
+                //实际下载文件的地址
+                String trueUrlPath = paths.get(s).getUrl();
+                //真实的保存文件的地址
+                String trueDictionary = getUrlDicotry();
+                //创建下载器
+                DownLoadActor actor = new DownLoadActor(headers,
+                        trueUrlPath,
+                        trueDictionary,
+                        paths.get(s).getSegmentName(),
+                        paths.get(s).getStart(),
+                        paths.get(s).getLength());
+                //设置下载器的tag,方便我们确认下载排序的序号
+                actor.actorTag = s;
+                //开启线程池
+                ProxyDownloadThread thread = new ProxyDownloadThread(actor);
+                //加入到线程池中执行
+                threadPool.execute(thread);
+                //创建
+                ProxyServerHttpSegment requestCallback = new ProxyServerHttpSegment(this, headers, actor, response);
+                //添加子请求
+                childList.add(requestCallback);
+            }
+
 
         //调用代理
         ProxyServerHttpSegProxer procter = new ProxyServerHttpSegProxer(this, childList, response, start);
@@ -560,85 +566,7 @@ public class ProxyServerHttp implements ProxyServer {
         //进行代理
         procter.proxy();
 
-        //设置线程池的监听
-        threadPool.setProxyThreadPoolListener(new ProxyThreadPoolListener() {
-            @Override
-                public void threadDone(int remain, String threadID) {
-                    System.out.println("线程下载完毕了，在这里进入缓存流程");
-                    List<ProxyServerHttpSegment> segments = childServerList;
-                    //已经下载的数量
-                    int downloaded = 0;
-                    //当前是否下载
-                    for (int s = 0; s < segments.size(); s++) {
-                        if (segments.get(s).getDownLoadActor().isDownloaded()) {
-                            downloaded++;
-                        }
-                    }
-                    System.out.println("当前下载总数"+downloaded);
-                //监听
-                synchronized (cacheListeners) {
-                    int progress = (int) (downloaded * 1.0 / segments.size() * 100);
-                    //监听
-                    System.out.println("当前下载进度:"+progress);
-                    for (int s = 0; s < cacheListeners.size(); s++) {
-                        cacheListeners.get(s).cachedProgress(progress);
-                    }
-                }
-            }
 
-            @Override
-            public void threadNomore() {
-                List<ProxyServerHttpSegment> segments = childServerList;
-                //已经下载的数量
-                int downloaded = 0;
-                //当前是否下载
-                for (int s = 0; s < segments.size(); s++) {
-                    if (segments.get(s).getDownLoadActor().isDownloaded()) {
-                        downloaded++;
-                    }
-                }
-                //下载
-                if (downloaded == segments.size()) {
-                    System.out.println("下载完了");
-                    //写入完成的数据
-                    DownloadDoneModel downloadDoneModel = new DownloadDoneModel();
-                    //设置url地址
-                    downloadDoneModel.setUrl(urlPath);
-                    //设置urlVideoID
-                    downloadDoneModel.setVideoID(urlVideoID);
-                    //缓存完成
-                    downloadDoneModel.setTotalSegment(segments.size());
-                    //完成
-                    ToolSDcard.writeObjectSdcard(getUrlDicotry(), urlVideoID + "done.data", downloadDoneModel);
-                    //监听
-                    synchronized (cacheListeners) {
-                        for (int s = 0; s < cacheListeners.size(); s++) {
-                            cacheListeners.get(s).cachedSuccess();
-                        }
-                        cacheListeners.clear();
-                    }
-                }
-                //修改
-                else {
-                    //还没有下载完成,而且有网络的情况下
-                    if (ToolIntenet.isNetworkAvailable(context)) {
-                        //遍历
-                        for (int s = 0; s < segments.size(); s++) {
-                            //没有下载完成的继续下载
-                            if (!segments.get(s).getDownLoadActor().isDownloaded()) {
-                                //开启线程池
-                                ProxyDownloadThread thread = new ProxyDownloadThread(segments.get(s).getDownLoadActor());
-                                //加入到线程池中执行
-                                proxyThreadPoolExecutor.execute(thread);
-                            }
-                        }
-                    } else {
-                        cancelAllListener();
-                    }
-
-                }
-            }
-        });
 
         //关闭当前的线程池
         cancelAllDownloading();
