@@ -46,8 +46,6 @@ class NetworkThread implements Runnable {
     // 分片索引
     private long index;
 
-
-
     // 下载结果列表
     public HashMap<Long, byte[]> contentList;
 
@@ -188,7 +186,6 @@ class NetworkThread implements Runnable {
             }
 
             this.run();
-            //e.printStackTrace();
         }
     }
 }
