@@ -154,6 +154,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         //设置
         mediaPlayer.play();
 
+        //mediaPlayer.setPosition(0.36f);
         //跳转
 //        Handler handler = new Handler() {
 //            public void handleMessage(Message message) {

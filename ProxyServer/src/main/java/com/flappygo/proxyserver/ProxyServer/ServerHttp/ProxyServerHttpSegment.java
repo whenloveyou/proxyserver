@@ -44,10 +44,8 @@ public class ProxyServerHttpSegment {
     //代理
     public void proxy(final long startOffset,
                       final ProxyServerHttpSegmentListener listener) {
-
-
         //如果该分段缓存文件不是正在下载的状态，而且当前已经下载完毕了
-        if (downLoadActor.isDownloaded()) {
+        if (/*downLoadActor.isDownloaded()*/ false) {
             //取得offset
             long offset = startOffset - downLoadActor.getRangeStart();
             System.out.println("走的缓存");
@@ -69,10 +67,7 @@ public class ProxyServerHttpSegment {
                     downLoadActor.getDownLoadUrl(),
                     startOffset,
                     length
-            ).doResponseNet();
+            ).doResponseNetThread();
         }
-
-
     }
-
 }

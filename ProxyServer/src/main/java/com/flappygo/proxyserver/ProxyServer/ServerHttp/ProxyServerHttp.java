@@ -19,6 +19,7 @@ import com.flappygo.proxyserver.ServerID.ServerIDManager;
 import com.flappygo.proxyserver.ServerPath.ServerPathManager;
 import com.flappygo.proxyserver.Tools.ToolDirs;
 import com.flappygo.proxyserver.Tools.ToolIntenet;
+import com.flappygo.proxyserver.Tools.ToolLog;
 import com.flappygo.proxyserver.Tools.ToolSDcard;
 import com.flappygo.proxyserver.Tools.ToolString;
 import com.koushikdutta.async.callback.CompletedCallback;
@@ -39,7 +40,6 @@ import java.util.Map;
 
 //请求用于HTTP等的请求
 public class ProxyServerHttp implements ProxyServer {
-
 
     //上下文保存
     private Context context;
@@ -192,8 +192,8 @@ public class ProxyServerHttp implements ProxyServer {
             Map responseMap = (Map) ToolSDcard.getObjectSdcard(getUrlDicotry(), getHttpHeadName());
 
             //如果总大小不为零，而且小于start,直接返回错误
-            if (Long.parseLong(contentLength) != 0 &&
-                    Long.parseLong(contentLength) <= rangeStart) {
+            if ((Long.parseLong(contentLength) != 0 &&
+                    Long.parseLong(contentLength) <= rangeStart) ) {
                 response.end();
                 return;
             }
@@ -525,10 +525,7 @@ public class ProxyServerHttp implements ProxyServer {
         //列表
         final List<ProxyServerHttpSegment> childList = new ArrayList<>();
 
-
-
         //判断
-
         for (int s = 0; s < paths.size(); s++) {
 
             //实际下载文件的地址

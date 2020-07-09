@@ -8,12 +8,15 @@ import com.koushikdutta.async.ByteBufferList;
 import com.koushikdutta.async.callback.WritableCallback;
 import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.StandardOpenOption;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.CountDownLatch;
@@ -24,7 +27,7 @@ class NetworkThread implements Runnable {
     private CountDownLatch cbRef;
 
     // 多线程下载的分片大小
-    public static long FILE_SEGMENHT_SIZE = 1024 * 400;
+    public static long FILE_SEGMENHT_SIZE = 1024 * 200;
 
     // 真实请求地址
     private String urlStr;
@@ -63,7 +66,7 @@ class NetworkThread implements Runnable {
                          long contentStartIndex, long contentLength)
             throws InterruptedException {
         // 设置分片大小
-        long segmentSize = FILE_SEGMENHT_SIZE;
+        long segmentSize = FILE_SEGMENHT_SIZE; // FILE_SEGMENHT_SIZE;
 
         // 计算需要多少线程进行下载
         long threadCount = contentLength / segmentSize;
@@ -100,11 +103,16 @@ class NetworkThread implements Runnable {
     }
 
     public void run() {
+        HttpURLConnection conn = null;
+        InputStream inputStream = null;
         try {
             //开始连接
+            SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+            Date startDate = new Date();
+
             URL url = new URL(this.urlStr);
             //打开链接
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
             //get
             conn.setRequestMethod("GET");
             //迭代器
@@ -119,9 +127,9 @@ class NetworkThread implements Runnable {
                 conn.setRequestProperty(key, value);
             }
             //设置请求的Range
-            long endPos = startPos+length-1;
-            conn.setRequestProperty("Range", "bytes=" + startPos + "-" + endPos);
-            InputStream inputStream = conn.getInputStream();
+            conn.setRequestProperty("Range", "bytes=" + startPos + "-");
+            conn.setReadTimeout(1500);
+            inputStream = conn.getInputStream();
 
             byte[] content = new byte[(int)length];
             //缓存大小
@@ -131,9 +139,17 @@ class NetworkThread implements Runnable {
             int startLen = 0;
             //循环读取
             while ((len = inputStream.read(buffer)) != -1) {
+                if ( startLen + len > length ){
+                    len = (int)(length) - startLen;
+                }
+
                 //内存拷贝
                 System.arraycopy(buffer, 0, content, startLen, len);
                 startLen += len;
+
+                if ( startLen + len == length ){
+                    break;
+                }
             }
 
             this.contentList.put(index, content);
@@ -144,10 +160,28 @@ class NetworkThread implements Runnable {
             //停止
             conn.disconnect();
 
+            Date endDate = new Date();
+            long consumeTime=endDate.getTime()-startDate.getTime();
+
+            System.out.println("thread time: "+index + " begin：" + format.format(startDate) +
+                    " end:" + format.format(endDate) + " consumeTime: " + consumeTime);
+
             // 线程计数处理
             this.cbRef.countDown();
         } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                if ( inputStream != null ){
+                    inputStream.close();
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+            if ( conn != null ){
+                conn.disconnect();
+            }
+
+            this.run();
+            //e.printStackTrace();
         }
     }
 }
@@ -243,18 +277,16 @@ public class HttpRequestNetwork {
                 }
             }
 
-            // 推送数据给 VLC 播放器
-            byte[] buffer = new byte[1024];
-            startPos = 0;
-            int len = 0;
-            while ( startPos < contentStr.length ){
-                // 计算发送数据长度
-                if ( contentStr.length - startPos < 1024 ){
-                    len = contentStr.length - startPos-1;
-                }else{
-                    len = buffer.length;
-                }
+            // 将 byte 转换为 inputStream
+            InputStream inputStream = new ByteArrayInputStream(contentStr);
 
+            // 推送给 VLC 播放器
+            // 缓存大小
+            byte[] buffer = new byte[1024];
+            // 长度
+            int len = 0;
+            // 循环读取
+            while ((len = inputStream.read(buffer)) != -1) {
                 //整个服务已经停止，不再相应
                 if (proxyServer.isStoped()) {
                     //提醒监听结束
@@ -264,16 +296,28 @@ public class HttpRequestNetwork {
                     break;
                 }
 
+                //跳出
+                if (rangeNower == rangeStart + rangeLength){
+                    break;
+                }
+
+                //如果读取的数据已经超出我们的限制，那么我们只写入我们需要的长度
+                if (rangeNower + len >= rangeStart + rangeLength) {
+                    //限制长度为这么多
+                    len = (int) (rangeStart + rangeLength - rangeNower);
+                }
+
                 //如果不是等待状态
                 if (awaitFlag == false) {
-                    // 获取数据
-                    System.arraycopy(contentStr, startPos, buffer, 0, len);
-                    startPos += len;
-                    //写入数据
-                    ByteBufferList bufferList = new ByteBufferList(buffer);
-                    //写入进去
+                    // 创建
+                    byte[] proxByte = new byte[len];
+                    // 内存拷贝
+                    System.arraycopy(buffer, 0, proxByte, 0, len);
+                    // 写入数据
+                    ByteBufferList bufferList = new ByteBufferList(proxByte);
+                    // 写入进去
                     response.write(bufferList);
-                    //写入了多少
+                    // 写入了多少
                     rangeNower += len;
                     //等待
                     if (bufferList.remaining() > 0) {
@@ -287,13 +331,16 @@ public class HttpRequestNetwork {
                 }
             }
 
+            //关闭连接
+            inputStream.close();
+
             // 结束分片处理
             if (rangeNower == rangeStart + rangeLength) {
                 if (listener != null) {
                     listener.segmentProxyEnd();
                 }
             }
-        } catch ( InterruptedException e ) {
+        } catch (InterruptedException | IOException e ) {
             //断线重连
             if (isNeedRetry()) {
                 //等待300毫秒
@@ -335,11 +382,13 @@ public class HttpRequestNetwork {
             }
             //设置请求的Range
             conn.setRequestProperty("Range", "bytes=" + rangeNower + "-");
+            //设置连接保持
+            conn.setRequestProperty("Connection", "Keep-Alive");
+
             //设置
             InputStream inputStream = conn.getInputStream();
             //重试
             resetRetryTime();
-
             //缓存大小
             byte[] buffer = new byte[1024];
             //长度
@@ -402,7 +451,6 @@ public class HttpRequestNetwork {
                     listener.segmentProxyEnd();
                 }
             }
-
         } catch (IOException e) {
             //断线重连
             if (isNeedRetry()) {
