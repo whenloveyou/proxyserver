@@ -20,6 +20,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 // 多线程请求数据类
 class NetworkThread implements Runnable {
@@ -44,6 +46,8 @@ class NetworkThread implements Runnable {
     // 分片索引
     private long index;
 
+
+
     // 下载结果列表
     public HashMap<Long, byte[]> contentList;
 
@@ -67,6 +71,7 @@ class NetworkThread implements Runnable {
             throws InterruptedException {
         // 设置分片大小
         long segmentSize = FILE_SEGMENHT_SIZE; // FILE_SEGMENHT_SIZE;
+
 
         // 计算需要多少线程进行下载
         long threadCount = contentLength / segmentSize;
@@ -93,8 +98,10 @@ class NetworkThread implements Runnable {
             }
 
             // 开启下载线程
+
             NetworkThread work = new NetworkThread(urlFile, headers, startPos, length, i, contentList, cbRef);
             new Thread(work).start();
+
         }
 
         cbRef.await();
@@ -255,6 +262,7 @@ public class HttpRequestNetwork {
         //此处对请求进行相应的代理处理
         try {
             this.isThread = true;
+
             NetworkThread networkThread = new NetworkThread(urlStr, headers, rangeStart, rangeLength);
 
             // 获取数据总长度

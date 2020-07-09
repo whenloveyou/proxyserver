@@ -426,13 +426,14 @@ public class DownLoadActor extends Thread {
                 thread=new MutiThreadDownLoad(threadCount,fileUrlPath,fileAbsolutePath,rangeStart,rangeLength,fileActure,latch);
             }
 
-         //   thread.executeDownLoad();
+           thread.executeDownLoad();
             downLoadState = DOWNLOADING;
             long startTime = System.currentTimeMillis();
+
             try {
                // thread.latch.await();
                 while (true){
-                   // Thread.sleep(10);
+                    Thread.sleep(10);
                     if (thread.latch.getCount()==0){
                         break;
                     }
@@ -441,6 +442,8 @@ public class DownLoadActor extends Thread {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
+
             long endTime = System.currentTimeMillis();
             System.out.println("全部下载结束,共耗时" + (endTime - startTime) / 1000 + "s");
             //保存cookie等数据
