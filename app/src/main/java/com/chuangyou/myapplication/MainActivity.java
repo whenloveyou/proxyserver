@@ -30,32 +30,32 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 
     //请求MP4
     //private String url = "http://vfx.mtime.cn/Video/2019/03/19/mp4/190319212559089721.mp4";
-   // private String url = "https://ca.nspace.live/moshou.mp4";
-   // private String url = "https://ca.nspace.live/animi/asian/quanzhifashi3/08.mp4";
+    // private String url = "https://ca.nspace.live/moshou.mp4";
+    // private String url = "https://ca.nspace.live/animi/asian/quanzhifashi3/08.mp4";
     // private String url = "https://ca.nspace.live/sdx19.mp4";
- // private String url = "https://hk1.nspace.live/moshou.mp4";
-     // private String url = "https://hk1.nspace.live/animi/asian/quanzhifashi3/03.mp4";
-  // private String url = "https://ca.nspace.live/moshou.mp4";
+    // private String url = "https://hk1.nspace.live/moshou.mp4";
+    // private String url = "https://hk1.nspace.live/animi/asian/quanzhifashi3/03.mp4";
+    // private String url = "https://ca.nspace.live/moshou.mp4";
     // private String url = "https://hk1.nspace.live/animi/asian/shizhongjiguanzhixing/shizhong12.mp4";
-  //   private String url = "https://hk1.nspace.live//series/cn/wuxinfashi/wuxinfashi01.mp4";
+    //private String url = "https://hk1.nspace.live//series/cn/wuxinfashi/wuxinfashi01.mp4";
     private String url = "https://hk1.nspace.live//series/cn/wuxinfashi/m3u8/01.m3u8";
- //    private String url = "https://flv2.bn.netease.com/videolib3/1711/04/uwieG3913/HD/uwieG3913-mobile.mp4";
+    //private String url = "https://flv2.bn.netease.com/videolib3/1711/04/uwieG3913/HD/uwieG3913-mobile.mp4";
     //private String url = "http://mother.nspace.site/series/cn/wuxinfashi/wuxinfashi01.mp4";
 
-  //  private String url = "https://hk1.nspace.live/series/cn/wuxinfashi/wuxinfashi01.mp4";
+    //private String url = "https://hk1.nspace.live/series/cn/wuxinfashi/wuxinfashi01.mp4";
 
     //private String url = "http://data.vod.itc.cn/?new=/91/42/pZqBu6MSS6qxJ83Lg979vf.mp4&vid=103937904&plat=17&mkey=TFnKEKpZxMTGPzyTf0wiSldd87RL7Z57&ch=null&user=api&uid=1608272337357415&SOHUSVP=VDu23U0Yy1SYOspSg9G7kMO1uHxStSw_3rI-9Y_I7uc&pt=1&prod=56&pg=1&eye=0&cv=1.0.0&qd=68000&src=11050001&ca=4&cateCode=300&_c=1&appid=tv";
 
     //private  String url = "https://blz-videos.nosdn.127.net/1/OverWatch/AnimatedShots/Overwatch_AnimatedShot_Soldier76_Hero.mp4";
 
     //private String url = "https://media.w3.org/2010/05/sintel/trailer.mp4";
-  //  private String url = "https://hk1.nspace.live/series/cn/qinyunian/m3u8/01.m3u8";
-   // private String url = "https://hk1.nspace.live/alitam3u8/01.m3u8";
+    //private String url = "https://hk1.nspace.live/series/cn/qinyunian/m3u8/01.m3u8";
+    //private String url = "https://hk1.nspace.live/alitam3u8/01.m3u8";
 
     //private String url = "http://v5.zgzo.com/hzw.mp4";
 
-    // private String url = "http://cctvalih5ca.v.myalicdn.com/live/cctv1_2/index.m3u8";
- //   private String url = "https://cn7.qxreader.com/hls/20200122/59353b55ae2b1f8aba0f26b5b7c7977f/1579693880/index.m3u8";
+    //private String url = "http://cctvalih5ca.v.myalicdn.com/live/cctv1_2/index.m3u8";
+    //private String url = "https://cn7.qxreader.com/hls/20200122/59353b55ae2b1f8aba0f26b5b7c7977f/1579693880/index.m3u8";
 
     //private String url = "https://baidu.com-l-baidu.com/20190813/14599_f58526fd/1000k/hls/index.m3u8";
 
@@ -155,6 +155,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         //设置
         mediaPlayer.play();
 
+        //mediaPlayer.setPosition(0.36f);
         //跳转
 //        Handler handler = new Handler() {
 //            public void handleMessage(Message message) {

@@ -82,9 +82,8 @@ public class ProxyServerHttpSegProxer {
                 //跳出循环
                 System.out.println("检查成功。在范围内");
                 return;
-
             }else{
-                System.out.println("测试是不是这里");
+                //System.out.println("测试是不是这里");
             }
 
         }

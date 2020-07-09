@@ -19,6 +19,7 @@ import com.flappygo.proxyserver.ServerID.ServerIDManager;
 import com.flappygo.proxyserver.ServerPath.ServerPathManager;
 import com.flappygo.proxyserver.Tools.ToolDirs;
 import com.flappygo.proxyserver.Tools.ToolIntenet;
+import com.flappygo.proxyserver.Tools.ToolLog;
 import com.flappygo.proxyserver.Tools.ToolSDcard;
 import com.flappygo.proxyserver.Tools.ToolString;
 import com.koushikdutta.async.callback.CompletedCallback;
@@ -39,7 +40,6 @@ import java.util.Map;
 
 //请求用于HTTP等的请求
 public class ProxyServerHttp implements ProxyServer {
-
 
     //上下文保存
     private Context context;
@@ -194,8 +194,8 @@ public class ProxyServerHttp implements ProxyServer {
             Map responseMap = (Map) ToolSDcard.getObjectSdcard(getUrlDicotry(), getHttpHeadName());
 
             //如果总大小不为零，而且小于start,直接返回错误
-            if (Long.parseLong(contentLength) != 0 &&
-                    Long.parseLong(contentLength) <= rangeStart) {
+            if ((Long.parseLong(contentLength) != 0 &&
+                    Long.parseLong(contentLength) <= rangeStart) ) {
                 response.end();
                 return;
             }
@@ -532,34 +532,8 @@ public class ProxyServerHttp implements ProxyServer {
         List<HttpSegmentModel> paths = ToolString.getHttpSegments(urlPath, contentLength, start, end);
         //列表
         final List<ProxyServerHttpSegment> childList = new ArrayList<>();
+
         //判断
-
-            for (int s = 0; s < paths.size(); s++) {
-
-                //实际下载文件的地址
-                String trueUrlPath = paths.get(s).getUrl();
-                //真实的保存文件的地址
-                String trueDictionary = getUrlDicotry();
-                //创建下载器
-                DownLoadActor actor = new DownLoadActor(headers,
-                        trueUrlPath,
-                        trueDictionary,
-                        paths.get(s).getSegmentName(),
-                        paths.get(s).getStart(),
-                        paths.get(s).getLength());
-                //设置下载器的tag,方便我们确认下载排序的序号
-                actor.actorTag = s;
-                //开启线程池
-                ProxyDownloadThread thread = new ProxyDownloadThread(actor);
-                //加入到线程池中执行
-                threadPool.execute(thread);
-                //创建
-                ProxyServerHttpSegment requestCallback = new ProxyServerHttpSegment(this, headers, actor, response);
-                //添加子请求
-                childList.add(requestCallback);
-            }
-
-
         //调用代理
         ProxyServerHttpSegProxer procter = new ProxyServerHttpSegProxer(this, childList, response, start);
 
